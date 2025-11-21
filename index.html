@@ -155,6 +155,12 @@
             background: transparent !important;
         }
         
+        /* Enable touch for interactive elements */
+        button, input, textarea, select, a, [onclick] {
+            touch-action: manipulation !important;
+            cursor: pointer !important;
+        }
+        
         .futuristic-bg::before {
             content: '';
             position: absolute;
@@ -327,6 +333,13 @@
             // Fix position to prevent scrolling
             document.body.style.position = 'fixed';
             document.body.style.width = '100%';
+            
+            // Enable touch for interactive elements specifically
+            const interactiveElements = document.querySelectorAll('button, input, textarea, select, a, [onclick]');
+            interactiveElements.forEach(element => {
+                element.style.touchAction = 'manipulation';
+                element.style.cursor = 'pointer';
+            });
         }
         
         // Prevent scroll events
@@ -338,15 +351,45 @@
                 return false;
             }, { passive: false });
             
-            // Prevent touch events for mobile
+            // Prevent touch events only on non-interactive elements
             document.addEventListener('touchmove', function(e) {
+                // Check if touch is on an interactive element
+                const interactiveElements = ['button', 'input', 'textarea', 'select', 'a'];
+                const target = e.target;
+                
+                if (interactiveElements.includes(target.tagName.toLowerCase()) || 
+                    target.onclick || 
+                    target.closest('button') || 
+                    target.closest('input') || 
+                    target.closest('textarea') || 
+                    target.closest('select') || 
+                    target.closest('a')) {
+                    // Allow touch on interactive elements
+                    return;
+                }
+                
                 e.preventDefault();
                 e.stopPropagation();
                 return false;
             }, { passive: false });
             
-            // Prevent touch start for mobile
+            // Prevent touch start for mobile only on non-interactive elements
             document.addEventListener('touchstart', function(e) {
+                // Check if touch is on an interactive element
+                const interactiveElements = ['button', 'input', 'textarea', 'select', 'a'];
+                const target = e.target;
+                
+                if (interactiveElements.includes(target.tagName.toLowerCase()) || 
+                    target.onclick || 
+                    target.closest('button') || 
+                    target.closest('input') || 
+                    target.closest('textarea') || 
+                    target.closest('select') || 
+                    target.closest('a')) {
+                    // Allow touch on interactive elements
+                    return;
+                }
+                
                 e.preventDefault();
                 e.stopPropagation();
                 return false;
@@ -391,17 +434,46 @@
             let isScrolling = false;
             
             document.addEventListener('touchstart', function(e) {
-                startY = e.touches[0].pageY;
+                // Only set startY if not on an interactive element
+                const interactiveElements = ['button', 'input', 'textarea', 'select', 'a'];
+                const target = e.target;
+                
+                const isOnInteractiveElement = interactiveElements.includes(target.tagName.toLowerCase()) || 
+                    target.onclick || 
+                    target.closest('button') || 
+                    target.closest('input') || 
+                    target.closest('textarea') || 
+                    target.closest('select') || 
+                    target.closest('a');
+                
+                if (!isOnInteractiveElement) {
+                    startY = e.touches[0].pageY;
+                }
             }, { passive: true });
             
             document.addEventListener('touchmove', function(e) {
                 currentY = e.touches[0].pageY;
                 let diff = startY - currentY;
                 
-                // Prevent scrolling when at top or bottom
-                if ((window.scrollY === 0 && diff < 0) || 
-                    ((window.innerHeight + window.scrollY) >= document.body.offsetHeight && diff > 0)) {
-                    e.preventDefault();
+                // Check if touch is on an interactive element
+                const interactiveElements = ['button', 'input', 'textarea', 'select', 'a'];
+                const target = e.target;
+                
+                const isOnInteractiveElement = interactiveElements.includes(target.tagName.toLowerCase()) || 
+                    target.onclick || 
+                    target.closest('button') || 
+                    target.closest('input') || 
+                    target.closest('textarea') || 
+                    target.closest('select') || 
+                    target.closest('a');
+                
+                // Only prevent scrolling if not on interactive element
+                if (!isOnInteractiveElement) {
+                    // Prevent scrolling when at top or bottom
+                    if ((window.scrollY === 0 && diff < 0) || 
+                        ((window.innerHeight + window.scrollY) >= document.body.offsetHeight && diff > 0)) {
+                        e.preventDefault();
+                    }
                 }
             }, { passive: false });
             
